@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     TextView statusLine;
 
     long activeDownloadId;
+    BroadcastReceiver completedReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         download10mb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://perlak.com/work/10MB.zip"));
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://mathprosolutions.com/work/10MB.zip"));
                 request.setTitle("10MB hidden download ");
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_HIDDEN);
                 startDownload(request);
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         download50mb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://perlak.com/work/50MB.zip"));
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://mathprosolutions.com/work/50MB.zip"));
                 request.setTitle("50MB standard ");
                 request.setDescription("50 download - visible active download notification");
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         getDownload50mbCompleted.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://perlak.com/work/50MB.zip"));
+                DownloadManager.Request request = new DownloadManager.Request(Uri.parse("http://mathprosolutions.com/work/50MB.zip"));
                 request.setTitle("50MB standard ");
                 request.setDescription("50 download - all visible");
                 request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -70,14 +71,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        registerReceiver(new BroadcastReceiver() {
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        completedReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
                 statusLine.setText(String.format("download completed  id= %d ", downloadId));
             }
-        }, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+        };
+        registerReceiver(completedReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (completedReceiver != null) {
+            unregisterReceiver(completedReceiver);
+            completedReceiver = null;
+        }
     }
 
     private void startDownload(DownloadManager.Request request) {
@@ -85,6 +100,5 @@ public class MainActivity extends AppCompatActivity {
         activeDownloadId = downloadManager.enqueue(request);
         statusLine.setText(String.format("Download started id = %d", activeDownloadId));
     }
-
 
 }
