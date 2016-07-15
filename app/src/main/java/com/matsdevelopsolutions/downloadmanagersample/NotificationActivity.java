@@ -19,8 +19,9 @@ public class NotificationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_notification);
         ButterKnife.bind(this);
 
-        long downloadId = getIntent().getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, 0);
+        long downloadId = getIntent().getLongArrayExtra(DownloadManager.EXTRA_NOTIFICATION_CLICK_DOWNLOAD_IDS)[0];
 
-        label.setText(String.format("Id clicked: %d", downloadId));
+        label.setText("TEST");
+        label.setText(String.format("clicked: %d", downloadId));
     }
 }
